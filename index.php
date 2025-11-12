@@ -48,46 +48,34 @@
     </div>
   </section>
 
-  <!-- PROJECTS SECTION -->
-  <section id="projects" class="py-5 bg-body-secondary">
-    <div class="container text-center">
-      <h2 class="fw-bold mb-4">My Projects</h2>
-      <p class="text-muted mb-5">Beberapa hasil karya dan proyek yang telah saya buat selama belajar pemrograman dan mekatronika.</p>
-      <div class="row gy-4">
-
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <img src="gambar/project1.webp" class="card-img-top" alt="project 1">
-            <div class="card-body">
-              <h5 class="card-title">Smart Home Control</h5>
-              <p class="card-text">Sistem pengendali AC rumah berbasis IoT menggunakan ESP32 dan web dashboard.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <img src="gambar/project2.jpg" class="card-img-top" alt="project 2">
-            <div class="card-body">
-              <h5 class="card-title">Drone Power Management</h5>
-              <p class="card-text">Proyek penelitian manajemen energi pada UAV Quadcopter untuk efisiensi daya optimal.</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <img src="gambar/Project3.png" class="card-img-top" alt="project 3">
-            <div class="card-body">
-              <h5 class="card-title">Portfolio Website</h5>
-              <p class="card-text">Website portofolio pribadi menggunakan HTML, CSS, dan Bootstrap.</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
+<!-- SERVICE SECTION -->
+<section id="service" class="py-5 bg-light">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">Proyek Saya</h2>
+      <p class="text-muted">Data berikut diambil secara dinamis dari database.</p>
     </div>
-  </section>
+    <div class="row">
+      <?php
+      include 'koneksi.php';
+      $result = mysqli_query($conn, "SELECT * FROM service");
+      while ($row = mysqli_fetch_assoc($result)) {
+      ?>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm text-center">
+            <!-- tambahkan gambar -->
+            <img src="<?= $row['title']; ?>" class="card-img-top" >
+            <div class="card-body">
+              <p class="card-text"><?= $row['description']; ?></p>
+            </div>
+          </div>
+        </div>
+      <?php } ?>
+    </div>
+  </div>
+</section>
+
+
 
   <!-- ABOUT SECTION -->
   <section id="about" class="py-5 bg-light">
@@ -120,6 +108,18 @@
       </div>
     </div>
   </section>
+
+  <!-- DATA REALTIME SECTION -->
+<section id="realtime" class="py-5 bg-body-secondary">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="fw-bold">Data Statistik Realtime</h2>
+      <p class="text-muted">Grafik berikut diambil langsung dari database menggunakan PHP dan Chart.js.</p>
+    </div>
+    <canvas id="realtimeChart" height="120"></canvas>
+  </div>
+</section>
+
 
   <!-- CONTACT SECTION -->
   <section id="contact" class="py-5 bg-body-secondary">
@@ -210,5 +210,55 @@
       }
     });
   </script>
+  <script>
+  const ctxRealtime = document.getElementById('realtimeChart').getContext('2d');
+  let realtimeChart;
+
+  async function fetchData() {
+    const response = await fetch('get_data.php');
+    const data = await response.json();
+    const labels = data.map(item => item.label);
+    const values = data.map(item => item.nilai);
+    return { labels, values };
+  }
+
+  async function updateChart() {
+    const { labels, values } = await fetchData();
+
+    if (!realtimeChart) {
+      realtimeChart = new Chart(ctxRealtime, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Nilai Realtime',
+            data: values,
+            fill: true,
+            borderColor: 'rgba(13, 110, 253, 1)',
+            backgroundColor: 'rgba(13, 110, 253, 0.2)',
+            tension: 0.3
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: { y: { beginAtZero: true } },
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    } else {
+      realtimeChart.data.labels = labels;
+      realtimeChart.data.datasets[0].data = values;
+      realtimeChart.update();
+    }
+  }
+
+  // panggil pertama kali
+  updateChart();
+
+  // update otomatis setiap 5 detik
+  setInterval(updateChart, 5000);
+</script>
+
 </body>
+
 </html>

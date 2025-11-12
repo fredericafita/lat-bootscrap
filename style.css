@@ -1,1 +1,23 @@
+.bg-home {
+  background: url('gambar/background.jpg') no-repeat center center/cover;
+  color: white; /* agar teks terlihat jelas */
+  position: relative;
+}
 
+/* Tambahkan efek overlay biar lebih elegan */
+.bg-home::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4); /* gelap transparan */
+  z-index: 0;
+}
+
+/* Supaya teks di atas overlay tetap terlihat */
+.bg-home .container {
+  position: relative;
+  z-index: 1;
+}
